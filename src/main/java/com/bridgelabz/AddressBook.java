@@ -1,9 +1,10 @@
 package com.bridgelabz;
 
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvValidationException;
+
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,7 @@ public class AddressBook {
     public ArrayList<ContactInfo> listOfContacts = new ArrayList<>();
 
     //Driver code
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, CsvValidationException {
         HashMap<String, AddressBook> multiAddressBook = new HashMap<>();
         System.out.println("Welcome to the ADDRESS BOOK");
         AddressBook obj = new AddressBook();
@@ -29,22 +30,24 @@ public class AddressBook {
 
         obj.createContact(multiAddressBook);
         obj.readFromFile();
-//        obj.searchContactBasedOnCity(multiAddressBook);
-//        obj.sortContactsByPersonName(multiAddressBook);
-//        obj.sortContactsByCity(multiAddressBook);
-//        obj.sortContactsByState(multiAddressBook);
-//        obj.sortContactsByZip(multiAddressBook);
+        obj.readFromCSVFile();
     }
 
     public void createContact(HashMap<String, AddressBook> multiAddressBook) throws IOException {
-        /*
-          BufferedWriter writes text to a character stream with efficiency (characters, arrays and strings are buffered
-            to avoid frequently writing to the underlying stream)
-           and provides a convenient method for writing a line separator: newLine().
-         */
+
         BufferedWriter bw1 = new BufferedWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook1.txt"));
         BufferedWriter bw2 = new BufferedWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook2.txt"));
         BufferedWriter bw3 = new BufferedWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook3.txt"));
+
+        CSVWriter csv1 = new CSVWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook1.csv"));
+        CSVWriter csv2 = new CSVWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook2.csv"));
+        CSVWriter csv3 = new CSVWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook3.csv"));
+
+        String[] header = {"FirstName", "LastName", "Address", "City", "State", "Zipcode", "PhoneNo", "Email"};
+        csv1.writeNext(header);
+        csv2.writeNext(header);
+        csv3.writeNext(header);
+
         while (!is_Running) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Enter 1 ,2 ,3 for diff addressBook and 4 to exit");
@@ -56,7 +59,17 @@ public class AddressBook {
                 default -> null;
             };
             if (option == 4) break;
-            System.out.println(" Enter 1 to create a new contact \n 2 to exit \n 3 to edit existing contact \n 4 to delete an existing contact");
+            System.out.println("""
+                     Enter:
+                    1.Create a new contact
+                    2.Exit
+                    3.Edit existing contact
+                    4.Delete an existing contact
+                    5.SearchContactBasedOnCity
+                    6.SortContactsByPersonName
+                    7.SortContactsByCity
+                    8.SortContactsByState
+                    9.SortContactsByZip""");
             int choice = scanner.nextInt();
             if (choice == 1) {
                 ContactInfo contact = new ContactInfo();
@@ -67,10 +80,21 @@ public class AddressBook {
                     multiAddressBook.get(key).listOfContacts.add(contact);                                                     //contact already exist in the addressBook
                     multiAddressBook.get(key).addressBook.get(name).displayContactInfo();
                     String outputData = multiAddressBook.get(key).addressBook.get(name).showContact();
+                    String csvOutputString = multiAddressBook.get(key).addressBook.get(name).showContactCSV();
+                    String[] csvData = csvOutputString.split(",");
                     switch (option) {
-                        case 1 -> bw1.write(outputData);
-                        case 2 -> bw2.write(outputData);
-                        case 3 -> bw3.write(outputData);
+                        case 1 -> {
+                            bw1.write(outputData);
+                            csv1.writeNext(csvData);
+                        }
+                        case 2 -> {
+                            bw2.write(outputData);
+                            csv2.writeNext(csvData);
+                        }
+                        case 3 -> {
+                            bw3.write(outputData);
+                            csv3.writeNext(csvData);
+                        }
                     }
 
                 } else System.out.println("Contact already exist duplicate not allowed");
@@ -80,35 +104,85 @@ public class AddressBook {
                 multiAddressBook.get(key).editContact();
             } else if (choice == 4) {
                 multiAddressBook.get(key).deleteContact();
+            } else if (choice == 5) {
+                searchContactBasedOnCity(multiAddressBook);
+            } else if (choice == 6) {
+                sortContactsByPersonName(multiAddressBook);
+            } else if (choice == 7) {
+                sortContactsByCity(multiAddressBook);
+            } else if (choice == 8) {
+                sortContactsByState(multiAddressBook);
+            } else if (choice == 9) {
+                sortContactsByZip(multiAddressBook);
             }
         }
         bw1.close();
         bw2.close();
         bw3.close();
+
+        csv1.close();
+        csv2.close();
+        csv3.close();
+    }
+
+    /**
+     * Method for reading data from csv file
+     *
+     * @throws IOException
+     * @throws CsvValidationException
+     */
+    public void readFromCSVFile() throws IOException, CsvValidationException {
+        System.out.println("\nReading from CSV files:  \n");
+        String[] contactInfo;
+        CSVReader csvR1 = new CSVReader(new FileReader("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook1.csv"));
+        while ((contactInfo = csvR1.readNext()) != null) {
+            for (String cell : contactInfo) {
+                System.out.print(cell + "\t");
+            }
+            System.out.println();
+        }
+        System.out.println("\n");
+        CSVReader csvR2 = new CSVReader(new FileReader("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook2.csv"));
+        while ((contactInfo = csvR2.readNext()) != null) {
+            for (String cell : contactInfo) {
+                System.out.print(cell + "\t");
+            }
+            System.out.println();
+        }
+        System.out.println("\n");
+        CSVReader csvR3 = new CSVReader(new FileReader("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook3.csv"));
+        while ((contactInfo = csvR3.readNext()) != null) {
+            for (String cell : contactInfo) {
+                System.out.print(cell + "\t");
+            }
+            System.out.println();
+        }
     }
 
     /**
      * Method for reading contacts stored in addressBook .txt File
+     *
      * @throws IOException
      */
     public void readFromFile() throws IOException {
         String contact;
+        System.out.println("\nReading from File IO method: \n");
         System.out.println("List of Contacts in AddressBook 1 : ");
         System.out.println("firstName, lastName, address, city, state, zipcode, phoneNo, email");
         BufferedReader br1 = new BufferedReader(new FileReader("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook1.txt"));
-        while ((contact = br1.readLine()) != null){
+        while ((contact = br1.readLine()) != null) {
             System.out.println(contact);
         }
         System.out.println("\nList of Contacts in AddressBook 2 : ");
         System.out.println("firstName, lastName, address, city, state, zipcode, phoneNo, email");
         BufferedReader br2 = new BufferedReader(new FileReader("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook2.txt"));
-        while ((contact = br2.readLine()) != null){
+        while ((contact = br2.readLine()) != null) {
             System.out.println(contact);
         }
         System.out.println("\nList of Contacts in AddressBook 3 : ");
         System.out.println("firstName, lastName, address, city, state, zipcode, phoneNo, email");
         BufferedReader br3 = new BufferedReader(new FileReader("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook3.txt"));
-        while ((contact = br3.readLine()) != null){
+        while ((contact = br3.readLine()) != null) {
             System.out.println(contact);
         }
     }
@@ -236,7 +310,7 @@ public class AddressBook {
             List<ContactInfo> sortedContacts = addressBookMapEntry.getValue().addressBook.values().stream().sorted(Comparator.comparing(contactInfo -> contactInfo.city)).collect(Collectors.toList());
             System.out.println("Sorted Contacts By City : ");
             for (ContactInfo currentContact : sortedContacts) {
-                System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName() + " City "+ currentContact.getCity());
+                System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName() + " City " + currentContact.getCity());
             }
             System.out.println("\n");
 
@@ -254,7 +328,7 @@ public class AddressBook {
             List<ContactInfo> sortedContacts = addressBookMapEntry.getValue().addressBook.values().stream().sorted(Comparator.comparing(contactInfo -> contactInfo.state)).collect(Collectors.toList());
             System.out.println("Sorted Contacts By State : ");
             for (ContactInfo currentContact : sortedContacts) {
-                System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName() + " State "+ currentContact.getState());
+                System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName() + " State " + currentContact.getState());
             }
             System.out.println("\n");
 
@@ -272,7 +346,7 @@ public class AddressBook {
             List<ContactInfo> sortedContacts = addressBookMapEntry.getValue().addressBook.values().stream().sorted(Comparator.comparing(contactInfo -> contactInfo.zipcode)).collect(Collectors.toList());
             System.out.println("Sorted Contacts By Zip : ");
             for (ContactInfo currentContact : sortedContacts) {
-                System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName() + " Zip "+ currentContact.getZipcode());
+                System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName() + " Zip " + currentContact.getZipcode());
             }
             System.out.println("\n");
         }

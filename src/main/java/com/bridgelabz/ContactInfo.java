@@ -103,4 +103,13 @@ class ContactInfo {
         return  firstName + "," + lastName + "," + address +
                 "," + city + "," + state + "," + zipcode + "," + phoneNo + "," + email + "\n";
     }
+<<<<<<< HEAD
 }
+=======
+
+    public String showContactCSV() {
+        return  firstName + "," + lastName + "," + address +
+                "," + city + "," + state + "," + zipcode + "," + phoneNo + "," + email;
+    }
+}
+>>>>>>> UC14_ReadWriteToCSVFile
