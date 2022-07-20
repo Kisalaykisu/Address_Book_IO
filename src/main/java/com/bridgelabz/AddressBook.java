@@ -37,7 +37,11 @@ public class AddressBook {
     }
 
     public void createContact(HashMap<String, AddressBook> multiAddressBook) throws IOException {
-
+        /*
+          BufferedWriter writes text to a character stream with efficiency (characters, arrays and strings are buffered
+            to avoid frequently writing to the underlying stream)
+           and provides a convenient method for writing a line separator: newLine().
+         */
         BufferedWriter bw1 = new BufferedWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook1.txt"));
         BufferedWriter bw2 = new BufferedWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook2.txt"));
         BufferedWriter bw3 = new BufferedWriter(new FileWriter("C:\\Users\\Kisalay\\Downloads\\IDE_Project\\AddressBook3.txt"));
